@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_04_05_190430) do
+ActiveRecord::Schema.define(version: 2024_04_05_205815) do
 
   create_table "merchants", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "company_name"
@@ -26,6 +26,8 @@ ActiveRecord::Schema.define(version: 2024_04_05_190430) do
     t.date "submission_date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "user_id"
+    t.index ["user_id"], name: "index_to_dos_on_user_id"
   end
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -38,9 +40,16 @@ ActiveRecord::Schema.define(version: 2024_04_05_190430) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "name"
     t.string "jti"
+    t.bigint "merchant_id"
+    t.boolean "admin"
+    t.string "company_name"
+    t.string "last_name"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["jti"], name: "index_users_on_jti"
+    t.index ["merchant_id"], name: "index_users_on_merchant_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "to_dos", "users"
+  add_foreign_key "users", "merchants"
 end
