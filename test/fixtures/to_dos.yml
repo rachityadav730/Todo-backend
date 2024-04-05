@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  description: MyText
+  creator_id: 1
+  assign_user_id: 1
+  submission_date: 2024-04-06
+
+two:
+  title: MyString
+  description: MyText
+  creator_id: 1
+  assign_user_id: 1
+  submission_date: 2024-04-06
