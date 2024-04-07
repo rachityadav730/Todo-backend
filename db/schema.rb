@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_04_05_205815) do
+ActiveRecord::Schema.define(version: 2024_04_06_171448) do
 
   create_table "merchants", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "company_name"
@@ -27,6 +27,9 @@ ActiveRecord::Schema.define(version: 2024_04_05_205815) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "user_id"
+    t.string "status"
+    t.bigint "merchant_id"
+    t.index ["merchant_id"], name: "index_to_dos_on_merchant_id"
     t.index ["user_id"], name: "index_to_dos_on_user_id"
   end
 
@@ -50,6 +53,7 @@ ActiveRecord::Schema.define(version: 2024_04_05_205815) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "to_dos", "merchants"
   add_foreign_key "to_dos", "users"
   add_foreign_key "users", "merchants"
 end
