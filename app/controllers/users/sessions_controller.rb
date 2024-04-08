@@ -8,7 +8,7 @@ class Users::SessionsController < Devise::SessionsController
       status: { 
         code: 200, message: 'Logged in successfully.',
         data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes],
-                all_users: UserSerializer.new(User.all).serializable_hash[:data].map { |user| user[:attributes] }
+                all_users: UserSerializer.new(User.where(admin: nil)).serializable_hash[:data].map { |user| user[:attributes] }
       },
       token: generate_jwt_token(current_user)
       }
