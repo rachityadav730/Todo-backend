@@ -14,12 +14,30 @@ class Users::SessionsController < Devise::SessionsController
       }
     }, status: :ok
   end
+  
   def respond_to_on_destroy
+    current_user = nil
+  
     if request.headers['Authorization'].present?
-      jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, Rails.application.credentials.devise_jwt_secret_key!).first
-      current_user = User.find(jwt_payload['sub'])
+      begin
+        # Decode the JWT and get the payload
+        jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, Rails.application.credentials.devise_jwt_secret_key!).first
+        current_user = User.find(jwt_payload['sub'])
+      rescue JWT::ExpiredSignature
+        # Handle expired token
+        return render json: {
+          status: 401,
+          message: 'Session has expired. Please log in again.'
+        }, status: :unauthorized
+      rescue JWT::DecodeError
+        # Handle other decoding errors
+        return render json: {
+          status: 401,
+          message: 'Invalid token. Please log in again.'
+        }, status: :unauthorized
+      end
     end
-    
+  
     if current_user
       render json: {
         status: 200,
@@ -32,6 +50,7 @@ class Users::SessionsController < Devise::SessionsController
       }, status: :unauthorized
     end
   end
+  
 
   def generate_jwt_token(user)
     JWT.encode({ user_id: user.id, exp: 24.hours.from_now.to_i }, Rails.application.credentials.devise_jwt_secret_key)
