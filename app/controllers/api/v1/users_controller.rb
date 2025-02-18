@@ -3,7 +3,7 @@ class Api::V1::UsersController < ApplicationController
 
 
     def index
-        user_data = User.where(merchant_id: 1)
+        user_data = User.where(merchant_id: current_user.merchant_id)
         render json: { status: user_data.pluck(:name).compact, data: user_data }
     end
     
@@ -11,7 +11,8 @@ class Api::V1::UsersController < ApplicationController
         p "users",user_params
         user_data = User.create(user_params)
         if user_data.save
-          render json: { status: 'success', data: user_data }
+          all_user = User.where(merchant_id: current_user.merchant_id)
+          render json: { status: 'success', data: all_user }
         else
           render json: { status: 'error', errors: user_data.errors.full_messages }, status: :unprocessable_entity
         end

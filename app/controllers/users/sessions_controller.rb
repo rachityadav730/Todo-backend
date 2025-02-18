@@ -4,15 +4,22 @@ class Users::SessionsController < Devise::SessionsController
   respond_to :json
   private
   def respond_with(current_user, _opts = {})
-    render json: {
-      status: { 
-        code: 200, message: 'Logged in successfully.',
-        data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes],
-                all_users: UserSerializer.new(User.where(admin: nil)).serializable_hash[:data].map { |user| user[:attributes] }
-      },
-      token: generate_jwt_token(current_user)
-      }
-    }, status: :ok
+    if current_user.nil?
+      Rails.logger.debug("Current user is nil.")
+      render json: { error: 'Unauthorized' }, status: :unauthorized
+    else
+      Rails.logger.debug("Authenticated User: #{current_user.inspect}")
+      render json: {
+        status: { 
+          code: 200, message: 'Logged in successfully.',
+          data: { 
+            user: UserSerializer.new(current_user).serializable_hash[:data][:attributes],
+            all_users: UserSerializer.new(User.where(admin: nil)).serializable_hash[:data].map { |user| user[:attributes] }
+          },
+          token: generate_jwt_token(current_user)
+        }
+      }, status: :ok
+    end
   end
   
   def respond_to_on_destroy
@@ -21,7 +28,7 @@ class Users::SessionsController < Devise::SessionsController
     if request.headers['Authorization'].present?
       begin
         # Decode the JWT and get the payload
-        jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, ENV['DEV_JWT_SECRET_KEY']).first
+        jwt_payload = JWT.decode(request.headers['Authorization'].split(' ').last, Rails.application.credentials.secret_key_base).first
         current_user = User.find(jwt_payload['sub'])
       rescue JWT::ExpiredSignature
         # Handle expired token
@@ -53,7 +60,7 @@ class Users::SessionsController < Devise::SessionsController
   
 
   def generate_jwt_token(user)
-    JWT.encode({ user_id: user.id, exp: 24.hours.from_now.to_i }, ENV['DEV_JWT_SECRET_KEY'])
+    JWT.encode({ user_id: user.id, exp: 24.hours.from_now.to_i }, Rails.application.credentials.secret_key_base)
   end
 end
 
